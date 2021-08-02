@@ -60,13 +60,15 @@ function longBlockingOperation() {
 ```javascript
 import { parallelize } from "thread-like";
 
+const config = { debug: false }; // Опциональный конфиг
+
 const longNonBlockingOperation = parallelize(function* longBlockingOperation() {
   let count = 0;
   while (count++ < 2500) {
     yield doSmth();
   }
   return count;
-});
+}, config);
 ```
 
 1. Функцию нужно сделать генератором (`function*`, [подробнее](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Statements/function*))
@@ -106,7 +108,3 @@ try {
   }
 }
 ```
-
-## TODO
-
-- Дебаг-инструменты для отслеживания того, оптимально ли размечены функции

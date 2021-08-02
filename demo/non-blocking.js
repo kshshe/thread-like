@@ -34,13 +34,18 @@ const l3 = parallelize(function* l3() {
   return count;
 });
 
-const longNonBlockingOperation = parallelize(function* longBlockingOperation() {
-  let count = 0;
-  while (count++ < 2500) {
-    yield doSmth();
+const longNonBlockingOperation = parallelize(
+  function* longBlockingOperation() {
+    let count = 0;
+    while (count++ < 2500) {
+      yield doSmth();
+    }
+    return count;
+  },
+  {
+    debug: true,
   }
-  return count;
-});
+);
 
 let lastTask;
 async function runNonBlockingTask() {

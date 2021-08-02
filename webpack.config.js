@@ -1,7 +1,7 @@
 import path from "path";
 
 export default {
-  mode: "development",
+  mode: "production",
   entry: "./src/browsers.js",
   output: {
     path: path.resolve("lib"),

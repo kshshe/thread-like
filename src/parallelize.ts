@@ -1,7 +1,14 @@
 import { Aborted, TASKS_LIMIT, TASKS_PAUSE } from "./utils/constants";
+import { Logger, statLogger } from "./utils/statLogger";
 import { wait } from "./utils/wait";
 
-type Parallelize = (generator: GeneratorFunction) => TaskRunner;
+type Parallelize = (
+  generator: GeneratorFunction,
+  config?: ParallelizeConfig
+) => TaskRunner;
+type ParallelizeConfig = {
+  debug?: boolean;
+};
 type TaskRunner = () => TaskPromise;
 type TaskInterface = {
   generator: Generator;
@@ -9,6 +16,7 @@ type TaskInterface = {
   result?: IteratorResult<unknown>;
   resolve: (reason?: any) => void;
   reject: (reason?: any) => void;
+  logger?: Logger;
 };
 interface TaskPromise extends Promise<unknown> {
   abort: (resolve?: boolean) => void;
@@ -31,24 +39,33 @@ const loop = async function loop() {
     let taskStartTime = Date.now();
     tasksLoop: while (checkDate(taskStartTime)) {
       for (const task of activeTasks) {
+        const onTaskEnd = () => {
+          activeTasks.delete(task);
+          if (task.logger) {
+            task.logger.end();
+          }
+        };
         if (!checkDate(taskStartTime)) {
           break tasksLoop;
         }
         if (task.aborted) {
-          activeTasks.delete(task);
+          onTaskEnd();
           continue;
         }
         try {
           task.result = task.generator.next();
         } catch (e) {
-          activeTasks.delete(task);
+          onTaskEnd();
           task.reject(e);
           continue;
         }
         if (task.result.done) {
-          activeTasks.delete(task);
+          onTaskEnd();
           task.resolve(task.result.value);
           continue;
+        }
+        if (task.logger) {
+          task.logger.tick();
         }
       }
     }
@@ -56,11 +73,22 @@ const loop = async function loop() {
   }
 };
 
-export const parallelize: Parallelize = function parallelize(generator) {
+export const parallelize: Parallelize = function parallelize(
+  generator,
+  config = {}
+) {
+  const configWithDefaults: ParallelizeConfig = {
+    debug: false,
+    ...config,
+  };
   const parallelRunner: TaskRunner = function parallelRunner() {
+    const logger = configWithDefaults.debug
+      ? statLogger(generator.name || "anonymous")
+      : undefined;
     const taskInterface: Partial<TaskInterface> = {
       generator: generator(),
       aborted: false,
+      logger,
     };
 
     const promise = new Promise((res, rej) => {
@@ -80,6 +108,9 @@ export const parallelize: Parallelize = function parallelize(generator) {
       }
     };
     loop();
+    if (logger) {
+      logger.start();
+    }
     return promise;
   };
 
