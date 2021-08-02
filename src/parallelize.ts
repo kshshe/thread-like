@@ -8,8 +8,9 @@ type Parallelize = (
 ) => TaskRunner;
 type ParallelizeConfig = {
   debug?: boolean;
+  maxTime?: number;
 };
-type TaskRunner = () => TaskPromise;
+type TaskRunner = (...attrs: unknown[]) => TaskPromise;
 type TaskInterface = {
   generator: Generator;
   aborted: boolean;
@@ -81,12 +82,12 @@ export const parallelize: Parallelize = function parallelize(
     debug: false,
     ...config,
   };
-  const parallelRunner: TaskRunner = function parallelRunner() {
+  const parallelRunner: TaskRunner = function parallelRunner(...attrs) {
     const logger = configWithDefaults.debug
       ? statLogger(generator.name || "anonymous")
       : undefined;
     const taskInterface: Partial<TaskInterface> = {
-      generator: generator(),
+      generator: generator(...attrs),
       aborted: false,
       logger,
     };
@@ -108,6 +109,12 @@ export const parallelize: Parallelize = function parallelize(
       }
     };
     loop();
+    if (configWithDefaults.maxTime) {
+      const abortTimeout = setTimeout(() => {
+        taskInterface.aborted = true;
+      }, configWithDefaults.maxTime);
+      promise.finally(() => clearTimeout(abortTimeout));
+    }
     if (logger) {
       logger.start();
     }

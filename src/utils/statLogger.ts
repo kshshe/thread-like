@@ -15,7 +15,7 @@ export const statLogger = (name: string): Logger => {
       console.log(`${name} started`);
     },
     end: () => {
-      const sum = ticks.reduce((a, b) => a + b);
+      const sum = ticks.reduce((a, b) => a + b, 0);
       const avg = (sum / ticks.length).toFixed(2);
       console.log(
         `${name}\nTicks ${ticks.length}\nAverage time is ${avg}ms/tick`

@@ -61,7 +61,7 @@ function longBlockingOperation() {
 ```javascript
 import { parallelize } from "thread-like";
 
-const config = { debug: false }; // Опциональный конфиг
+const config = {}; // Опциональный конфиг
 
 const longNonBlockingOperation = parallelize(function* longBlockingOperation() {
   let count = 0;
@@ -71,6 +71,11 @@ const longNonBlockingOperation = parallelize(function* longBlockingOperation() {
   return count;
 }, config);
 ```
+
+| Поле конфига | Тип       | Значение по-умолчанию |
+| ------------ | --------- | --------------------- |
+| `debug`      | `boolean` | `false`               |
+| `maxTime`    | `number`  | `null`                |
 
 1. Функцию нужно сделать генератором (`function*`, [подробнее](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Statements/function*))
 2. В местах, где планировщику можно будет остановиться, чтобы дать браузеру время на рендер, нужно разместить оператор `yield`
