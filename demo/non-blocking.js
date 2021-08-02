@@ -7,33 +7,6 @@ function doSmth() {
   }
 }
 
-const l1 = parallelize(function* l1() {
-  let count = 0;
-  while (count++ < 2500) {
-    doSmth();
-    yield;
-  }
-  return count;
-});
-
-const l2 = parallelize(function* l2() {
-  let count = 0;
-  while (count++ < 2500) {
-    doSmth();
-    yield;
-  }
-  return count;
-});
-
-const l3 = parallelize(function* l3() {
-  let count = 0;
-  while (count++ < 2500) {
-    doSmth();
-    yield;
-  }
-  return count;
-});
-
 const longNonBlockingOperation = parallelize(
   function* longBlockingOperation() {
     let count = 0;

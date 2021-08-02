@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/sakura.css/css/sakura.css"
+      type="text/css"
+    />
+    <style>
+      .fps {
+        margin: 5px 0;
+      }
+      .fps__line {
+        height: 40px;
+        padding: 5px;
+        width: 0;
+        box-sizing: border-box;
+        background-color: aquamarine;
+        transition: 0.2s width;
+        white-space: nowrap;
+      }
+      .tasks__line {
+        margin: 0;
+        padding: 0;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="buttons">
+      <button onclick="runNonBlockingTask()">
+        Запустить неблокирующую операцию
+      </button>
+      <button onclick="runNonBlockingTasksX10()">x10</button>
+    </div>
+    <br />
+    <pre><code>function doSmth() {
+      // Какие-то операции на 0.3 миллисекунды
+    }</code></pre>
+
+    <pre><code>function longBlockingOperation() {
+      let count = 0;
+      while (count++ < 2500) {
+        doSmth();
+      }
+    }</code></pre>
+    <div>
+      Если страница заблокирована, число не увеличивается:
+      <span class="counter"></span>
+    </div>
+    <div class="fps">
+      <div class="fps__line"></div>
+    </div>
+    <pre class="tasks"></pre>
+    <script src="../lib/parallelize.js"></script>
+    <script src="./utils.js"></script>
+    <script src="./non-blocking-multi.js"></script>
+  </body>
+</html>

@@ -52,6 +52,7 @@ function longBlockingOperation() {
 ## Demo
 
 - [Обычное синхронное vs параллельное выполнение](http://htmlpreview.github.io/?https://github.com/kshshe/thread-like/blob/master/demo/index.html)
+- [Несколько параллельных задач](http://htmlpreview.github.io/?https://github.com/kshshe/thread-like/blob/master/demo/multi.html)
 
 ## API
 
