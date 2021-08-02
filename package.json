@@ -8,8 +8,7 @@
     "build-ts": "tsc --build",
     "build": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky install",
-    "publish": "npm run build-ts && npm publish"
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
