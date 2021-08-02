@@ -107,7 +107,7 @@ task.abort(resolve);
 import { Aborted, isAborted } from 'thread-like';
 ...
 try {
-	const task = await runTask();
+  const task = await runTask();
 } catch (e) {
   if (!isAborted(e)) { // Или e !== Aborted
     // Обработка ошибки
