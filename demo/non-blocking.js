@@ -12,7 +12,8 @@ const longNonBlockingOperation = parallelize(
     let count = 0;
     while (count++ < 2500) {
       task.iterations = count;
-      yield doSmth();
+      doSmth();
+      yield* parallelize.everyNth(count, 10);
     }
     return count;
   },

@@ -118,3 +118,21 @@ try {
   }
 }
 ```
+
+## Helpers
+
+### Yield каждые n итераций
+
+Позволяет останавливать выполнение не каждый раз, а каждые `n` итераций.
+
+```javascript
+import { parallelize, everyNth } from 'thread-like';
+...
+const p = parallelize(function* () {
+  let count = 0;
+  while (true) {
+    count++;
+    yield* everyNth(count, 100);
+  }
+});
+```
