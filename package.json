@@ -14,7 +14,15 @@
     "type": "git",
     "url": "git+https://github.com/kshshe/thread-like.git"
   },
-  "author": "",
+  "author": "Alexey Laud <npm@a-laud.ru>",
+  "keywords": [
+    "parallel",
+    "threading",
+    "multithreading",
+    "async",
+    "fiber",
+    "performance"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/kshshe/thread-like/issues"
