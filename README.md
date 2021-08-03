@@ -14,6 +14,12 @@ npm install thread-like
 <script src="https://cdn.jsdelivr.net/npm/thread-like/lib/parallelize.js"></script>
 ```
 
+## Demo
+
+- [Обычное синхронное vs параллельное выполнение](http://htmlpreview.github.io/?https://github.com/kshshe/thread-like/blob/master/demo/index.html)
+- [Несколько параллельных задач](http://htmlpreview.github.io/?https://github.com/kshshe/thread-like/blob/master/demo/multi.html)
+- [`while (true)`](http://htmlpreview.github.io/?https://github.com/kshshe/thread-like/blob/master/demo/infinite.html)
+
 ## Зачем?
 
 Допустим, в ответ на действие пользователя нужно посчитать какой-то большой объем данных. Если этот процесс будет занимать больше 16 миллисекунд (столько нужно, чтобы хватило времени на рендер 60 кадров в секунду), пользователь может заметить задержки. При больших значениях (200+) страница и вовсе будет восприниматься, как "зависшая".
@@ -52,11 +58,6 @@ function longBlockingOperation() {
 Для параллельного выполнения не требуется никаких дополнительных действий. Исполнитель будет запускать части всех задач поочередно, создавая подобие параллельности: здесь задачи `l1`, `l2` и `l3` выполняются одновременно.
 
 ![](./images/multi.png)
-
-## Demo
-
-- [Обычное синхронное vs параллельное выполнение](http://htmlpreview.github.io/?https://github.com/kshshe/thread-like/blob/master/demo/index.html)
-- [Несколько параллельных задач](http://htmlpreview.github.io/?https://github.com/kshshe/thread-like/blob/master/demo/multi.html)
 
 ## API
 

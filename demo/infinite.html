@@ -28,20 +28,8 @@
     </style>
   </head>
   <body>
-    <div class="buttons">
-      <button onclick="runNonBlockingTask()">
-        Запустить неблокирующую операцию
-      </button>
-      <button onclick="runNonBlockingTasksX10()">x10</button>
-    </div>
-    <br />
-    <pre><code>function doSmth() {
-  // Какие-то операции на 0.3 миллисекунды
-}</code></pre>
-
     <pre><code>function longBlockingOperation() {
-  let count = 0;
-  while (count++ < 2500) {
+  while (true) {
     doSmth();
   }
 }</code></pre>
@@ -55,6 +43,6 @@
     <pre class="tasks"></pre>
     <script src="../lib/parallelize.js"></script>
     <script src="./utils.js"></script>
-    <script src="./non-blocking-multi.js"></script>
+    <script src="./non-blocking-infinite.js"></script>
   </body>
 </html>
