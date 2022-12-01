@@ -1,10 +1,16 @@
 # Thread-like
 
-Утилита, позволяющая распараллеливать синхронные функции, обеспечивая высокую частоту кадров.
+A tool, which allows you to make non-parallel function work like they are running in separate threads.
 
 [![npm version](https://badge.fury.io/js/thread-like.svg)](https://badge.fury.io/js/thread-like)
 
-## Установка
+- [Installation](#installation)
+- [Demo](#demo)
+- [Why?](#why)
+- [API](#API)
+- [Helpers](#helpers)
+
+## Installation
 
 ```bash
 npm install thread-like
@@ -16,57 +22,51 @@ npm install thread-like
 
 ## Demo
 
-- [Обычное синхронное vs параллельное выполнение](http://htmlpreview.github.io/?https://github.com/kshshe/thread-like/blob/master/demo/index.html)
-- [Несколько параллельных задач](http://htmlpreview.github.io/?https://github.com/kshshe/thread-like/blob/master/demo/multi.html)
+- [Sync vs parellel executing](http://htmlpreview.github.io/?https://github.com/kshshe/thread-like/blob/master/demo/index.html)
+- [Several parallel tasks](http://htmlpreview.github.io/?https://github.com/kshshe/thread-like/blob/master/demo/multi.html)
 - [`while (true)`](http://htmlpreview.github.io/?https://github.com/kshshe/thread-like/blob/master/demo/infinite.html)
 
-## Зачем?
+## Why?
 
-Допустим, в ответ на действие пользователя нужно посчитать какой-то большой объем данных. Если этот процесс будет занимать больше 16 миллисекунд (столько нужно, чтобы хватило времени на рендер 60 кадров в секунду), пользователь может заметить задержки. При больших значениях (200+) страница и вовсе будет восприниматься, как "зависшая".
+- You need to calculate something big
+- It takes a lot of time and blocks the main thread (UI)
+- You want to make it work in parallel
 
-В качестве примера можно взять такой код:
+For example, imagine you have to run `doSmth()` (executes in 1-2 ms) many times:
 
 ```javascript
 function longBlockingOperation() {
   let count = 0;
   while (count++ < 2500) {
-    doSmth(); // Какие-то операции на 0.1 – 0.5 миллисекунды
+    doSmth();
   }
 }
 ```
 
-Если его просто запустить, страница заблокируется примерно на секунду. Достаточно, чтобы подумать, что с сервисом что-то не так.
+If you just run it, the page will be blocked for about a second. Enough to think that something is wrong with the service.
 
-Профайлер покажет примерно такой результат: на 964 миллисекунды поток выполнения заблокирован задачей `longBlockingOperation`.
+DevTools Profiler will show something like this: the thread is blocked for 964 ms by `longBlockingOperation`.
 
-![Профайлер при синхронном выполнении задачи](./images/sync.png)
+![Profiler with sync execution](./images/sync.png)
 
-## Решение
+`thread-like` allows you to make such function:
 
-Пакет `thread-like` позволяет с минимальными изменениями кода сделать такую функцию
+- run in parallel
+- stoppable
+- non-blocking
 
-- не блокирующей поток выполнения
-- прерываемой
-- выполняемой параллельно с другими подобными задачами
-
-Выполнение будет разбиваться на небольшие части:
+Execution will be split into small parts:
 
 ![](./images/parallel.png)
 
-### Параллельное выполнение
-
-Для параллельного выполнения не требуется никаких дополнительных действий. Исполнитель будет запускать части всех задач поочередно, создавая подобие параллельности: здесь задачи `l1`, `l2` и `l3` выполняются одновременно.
-
-![](./images/multi.png)
-
 ## API
 
-### Создание параллельной функции (`parallelize`)
+### `parallelize(fn*, options)`
 
 ```javascript
 import { parallelize } from "thread-like";
 
-const config = {}; // Опциональный конфиг
+const config = {}; // optional
 
 const longNonBlockingOperation = parallelize(function* longBlockingOperation() {
   let count = 0;
@@ -77,36 +77,36 @@ const longNonBlockingOperation = parallelize(function* longBlockingOperation() {
 }, config);
 ```
 
-| Поле конфига | Тип       | Значение по-умолчанию |
-| ------------ | --------- | --------------------- |
-| `debug`      | `boolean` | `false`               |
-| `maxTime`    | `number`  | `null`                |
+| Config | Type       | Default |  Description  |
+| ------------ | --------- | --------------------- | --------------------- |
+| `debug`      | `boolean` | `false`               | Show debug messages in console |
+| `maxTime`    | `number`  | `null`                | Max time of execution in ms. If `null` - no limit |
 
-1. Функцию нужно сделать генератором (`function*`, [подробнее](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Statements/function*))
-2. В местах, где планировщику можно будет остановиться, чтобы дать браузеру время на рендер, нужно разместить оператор `yield`
+1. You should make target function a generator (`function*`, [more](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Statements/function*))
+2. You have to mark places for splits with `yield`
 
-> `yield`'ов не должно быть слишком много. Идеально, если между двумя `yield` будет проходить хотя бы 0.1 миллисекунды. В противном случае на переключение и контроль времени будет уходить больше ресурсов, и выполнение задачи замедлится в разы.
+> It will be better if there will be at least 0.1 ms between two `yield`s. Otherwise, the time for switching and controlling will be spent more resources, and the execution of the task will be slowed down many times.
 
-Теперь вызов `longNonBlockingOperation` будет запускать блокирующую операцию, и приостанавливать её в `yield` тогда, когда время, выдаваемое на блокировку (13 миллисекунд), истекло.
+Now you can run `longNonBlockingOperation` and it will run in pseudo-parallel mode.
 
-### Подписка на результат выполнения (`task`)
+### await
 
 ```javascript
 const task1 = longNonBlockingOperation();
 const task2 = await longNonBlockingOperation();
 ```
 
-Созданная в `parallelize` функция возвращает промис, который будет разрешен тогда, когда выполнение задачи дойдет до конца. В результат промиса попадет значение, возвращенное функцией.
+Parallelized function returns a Promise, which will be resolved when the task is completed.
 
-Дополнительно к интерфейсу промиса, у таски будет метод `abort` для её остановки.
+### `abort`
 
-### Отмена выполнения (`abort`)
+You can stop the task at any time:
 
 ```javascript
 task.abort(resolve);
 ```
 
-Остановит выполнение таски, промис перейдет в состояние `fullfilled` или `rejected` в зависимости от параметра `resolve` (по умолчанию `true`). Значением в обработчике будет символ `Aborted`:
+It will stop the task, the promise will be resolved or rejected depending on the `resolve` parameter (`true` by default). The value in the handler will be the `Aborted` symbol:
 
 ```javascript
 import { Aborted, isAborted } from 'thread-like';
@@ -115,16 +115,16 @@ try {
   const task = await runTask();
 } catch (e) {
   if (!isAborted(e)) { // Или e !== Aborted
-    // Обработка ошибки
+    // Abort handling
   }
 }
 ```
 
 ## Helpers
 
-### Yield каждые n итераций
+### Yield every n iterations
 
-Позволяет останавливать выполнение не каждый раз, а каждые `n` итераций.
+Allows to stop execution not every time, but every `n` iterations.
 
 ```javascript
 import { parallelize, everyNth } from 'thread-like';
